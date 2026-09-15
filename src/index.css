@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family: 'Noto Sans SC', 'PingFang SC', system-ui, sans-serif;
+  background-color: #fff4e8;
+  background-image: radial-gradient(circle at 12% 12%, rgba(244, 162, 97, 0.10), transparent 40%),
+    radial-gradient(circle at 88% 8%, rgba(148, 184, 199, 0.16), transparent 42%),
+    radial-gradient(circle at 70% 90%, rgba(231, 111, 81, 0.08), transparent 45%);
+  min-height: 100vh;
+  color: #6b4b3a;
+}
+
+.font-cute {
+  font-family: 'Baloo 2', 'Comic Sans MS', 'Noto Sans SC', sans-serif;
+}
+
+/* hide number input arrows for cleaner cartoon look */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* cute range focus */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px dashed #f2a65a;
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #eacbab;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
