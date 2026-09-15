@@ -154,7 +154,8 @@ async function parseCsv(arrayBuffer, accounts, opts = {}) {
 
 /* ---------- Excel (.xlsx / .xls) ---------- */
 async function parseExcel(arrayBuffer, accounts, opts = {}) {
-  const { default: XLSX } = await import('xlsx')
+  const mod = await import('xlsx')
+  const XLSX = mod.default ?? mod // tolerate both CJS-interop shapes
   const wb = XLSX.read(arrayBuffer, { type: 'array' })
   let parsed = []
   let type = 'generic'
@@ -203,9 +204,10 @@ function normalizeFromCells(cleaned, accounts, opts) {
 
 /* ---------- PDF (best-effort text extraction) ---------- */
 async function parsePdf(arrayBuffer, accounts) {
-  const { default: P } = await import('pdfjs-dist')
+  const pmod = await import('pdfjs-dist')
+  const P = pmod.default ?? pmod
   const worker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url')
-  P.GlobalWorkerOptions.workerSrc = worker.default
+  P.GlobalWorkerOptions.workerSrc = worker.default ?? worker
   const lines = await extractPdfLines(P, arrayBuffer)
   const parsed = pdfRowsToTransactions(lines, accounts)
   return { type: 'pdf', parsed }
