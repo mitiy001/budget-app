@@ -1,0 +1,6 @@
+{
+  "appId": "com.porklypig.ledger",
+  "appName": "猪宝存钱罐",
+  "webDir": "dist",
+  "backgroundColor": "#FFF4E8"
+}
