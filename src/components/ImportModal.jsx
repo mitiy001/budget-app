@@ -34,8 +34,7 @@ export default function ImportModal({ accounts, transactionFPs, onClose, onImpor
     reset()
     setFileName(file.name)
     try {
-      const buf = await file.arrayBuffer()
-      const { type, parsed: rows } = await parseBillFile(buf, accounts, { mapping: {} })
+      const { type, parsed: rows } = await parseBillFile(file, accounts, { mapping: {} })
       // mark existing duplicates
       let dups = 0
       rows.forEach((r) => {
@@ -108,15 +107,15 @@ export default function ImportModal({ accounts, transactionFPs, onClose, onImpor
         <input
           ref={fileRef}
           type="file"
-          accept=".csv,.txt"
+          accept=".csv,.txt,.xlsx,.xls,.pdf"
           className="hidden"
           onChange={onFile}
         />
         <UploadIcon size={30} className="mx-auto mb-2" />
         <p className="font-semibold text-pig-ink mb-1">
-          {fileName || '点击选择支付宝 / 微信导出的 CSV 账单'}
+          {fileName || '点击选择支付宝 / 微信导出的账单'}
         </p>
-        <p className="text-xs text-pig-sub">支持 GBK / UTF-8 自动识别 · 自动去重 · 预览后再导入</p>
+        <p className="text-xs text-pig-sub">支持 CSV / Excel / PDF · 自动识别 · 自动去重 · 预览后再导入</p>
         {isParsing && <p className="mt-2 text-sm text-pig-coral">解析中…</p>}
         {notice && <p className="mt-2 text-sm text-pig-ink">{notice}</p>}
       </div>
@@ -233,5 +232,5 @@ export default function ImportModal({ accounts, transactionFPs, onClose, onImpor
 }
 
 function billTypeName(t) {
-  return { alipay: '支付宝', wechat: '微信', generic: '通用' }[t] || '通用'
+  return { alipay: '支付宝', wechat: '微信', generic: '通用', pdf: 'PDF' }[t] || '通用'
 }
