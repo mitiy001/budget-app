@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { fmtMoney } from '../store'
 import { EditIcon, TrashIcon, ArrowUp, ArrowDown } from '../icons'
 
-export default function TxnRow({ txn, accounts, editing, onEditToggle, onSave, onCancel, onDelete }) {
+export default function TxnRow({ txn, accounts, editing, onEditToggle, onSave, onCancel, onDelete, goalName }) {
   const [form, setForm] = useState({
     date: txn.date,
     accountId: txn.accountId,
@@ -52,6 +52,9 @@ export default function TxnRow({ txn, accounts, editing, onEditToggle, onSave, o
       <div className="flex items-center gap-2 min-w-0">
         <span className="text-xs text-pig-sub shrink-0">{txn.date}</span>
         <span className="text-sm font-medium text-pig-ink truncate">{txn.note}</span>
+        {goalName && (
+          <span className="text-[11px] text-pig-accent bg-[#FDEBD2] px-2 py-0.5 rounded-full shrink-0 font-medium">🎯 {goalName}</span>
+        )}
         {acc && <span className="text-xs text-pig-sub bg-pig-bg px-2 py-0.5 rounded-full shrink-0">{acc.name}</span>}
       </div>
       <div className="flex items-center gap-1 shrink-0">

@@ -45,6 +45,7 @@ const seed = () => ({
     aiModel: 'deepseek-chat',
   },
   importedFingerprints: [],
+  goals: [],
 })
 
 const load = () => {
@@ -57,6 +58,7 @@ const load = () => {
       transactions: data.transactions || [],
       settings: { ...seed().settings, ...(data.settings || {}) },
       importedFingerprints: data.importedFingerprints || [],
+      goals: data.goals || [],
     }
   } catch {
     return seed()
@@ -137,6 +139,60 @@ export function useAppStore() {
     }))
   }, [])
 
+  /* ---------- goal actions ---------- */
+  const addGoal = useCallback((goal) => {
+    setData((d) => ({
+      ...d,
+      goals: [
+        ...d.goals,
+        {
+          id: uid(),
+          name: '新目标',
+          targetAmount: 0,
+          startDate: todayStr(),
+          endDate: todayStr(),
+          linkedAccountIds: [],
+          initialSaved: 0,
+          manualAdjust: 0,
+          checkins: [],
+          status: 'active',
+          note: '',
+          createdAt: Date.now(),
+          ...goal,
+        },
+      ],
+    }))
+  }, [])
+
+  const updateGoal = useCallback((id, patch) => {
+    setData((d) => ({
+      ...d,
+      goals: d.goals.map((g) => (g.id === id ? { ...g, ...patch } : g)),
+    }))
+  }, [])
+
+  const deleteGoal = useCallback((id) => {
+    setData((d) => ({ ...d, goals: d.goals.filter((g) => g.id !== id) }))
+  }, [])
+
+  const addGoalCheckin = useCallback((id, entry) => {
+    setData((d) => ({
+      ...d,
+      goals: d.goals.map((g) =>
+        g.id === id ? { ...g, checkins: [...(g.checkins || []), { id: uid(), ...entry }] } : g
+      ),
+    }))
+  }, [])
+
+  const deleteGoalCheckin = useCallback((goalId, checkinId) => {
+    setData((d) => ({
+      ...d,
+      goals: d.goals.map((g) =>
+        g.id === goalId ? { ...g, checkins: (g.checkins || []).filter((c) => c.id !== checkinId) } : g
+      ),
+    }))
+  }, [])
+
   return {
     ...data,
     addAccount,
@@ -148,6 +204,11 @@ export function useAppStore() {
     deleteTransaction,
     setSettings,
     recordImportedFingerprints,
+    addGoal,
+    updateGoal,
+    deleteGoal,
+    addGoalCheckin,
+    deleteGoalCheckin,
   }
 }
 

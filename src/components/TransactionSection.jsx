@@ -3,7 +3,7 @@ import { SparkIcon, ArrowUp, ArrowDown, PlusIcon, UploadIcon } from '../icons'
 import { aiParseLedger, matchAccount } from '../ai'
 import { todayStr } from '../store'
 
-export default function TransactionSection({ accounts, onAdd, settings, onOpenImport }) {
+export default function TransactionSection({ accounts, onAdd, settings, onOpenImport, goals }) {
   const [aiText, setAiText] = useState('')
   const [aiState, setAiState] = useState('idle') // idle | loading | done
   const [aiHint, setAiHint] = useState('')
@@ -13,6 +13,7 @@ export default function TransactionSection({ accounts, onAdd, settings, onOpenIm
     direction: 'deposit',
     amount: '',
     note: '',
+    goalId: '',
   })
   const [error, setError] = useState('')
 
@@ -54,8 +55,9 @@ export default function TransactionSection({ accounts, onAdd, settings, onOpenIm
       amount: form.direction === 'withdraw' ? -Math.abs(amount) : Math.abs(amount),
       direction: form.direction,
       note: form.note.trim() || (form.direction === 'deposit' ? '存入' : '支取'),
+      goalId: form.direction === 'deposit' ? (form.goalId || '') : '',
     })
-    setForm((f) => ({ ...f, amount: '', note: '' }))
+    setForm((f) => ({ ...f, amount: '', note: '', goalId: '' }))
     setAiText('')
     setError('')
   }
@@ -145,6 +147,25 @@ export default function TransactionSection({ accounts, onAdd, settings, onOpenIm
             />
           </div>
         </div>
+
+        {form.direction === 'deposit' && goals && goals.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-pig-sub">计入目标</span>
+            <select
+              className="rounded-2xl border-2 border-[#EFDCBF] px-3 py-1.5 text-pig-ink bg-white text-sm"
+              value={form.goalId}
+              onChange={(e) => setForm({ ...form, goalId: e.target.value })}
+            >
+              <option value="">不指定（仅计入账户）</option>
+              {goals
+                .filter((gv) => gv.status === 'active')
+                .map((gv) => (
+                  <option key={gv.id} value={gv.id}>{gv.name}</option>
+                ))}
+            </select>
+            <span className="text-[11px] text-pig-sub">绑定账户的存入也会自动累计到目标进度</span>
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex gap-2">

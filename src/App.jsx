@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useAppStore, computeMonthlyBalances, yyyymm, round2, transactionFingerprint } from './store'
+import { computeGoal } from './goals'
 import Filters from './components/Filters'
 import Metrics from './components/Metrics'
 import TransactionSection from './components/TransactionSection'
@@ -8,21 +9,24 @@ import AccountModal from './components/AccountModal'
 import SettingsModal from './components/SettingsModal'
 import SummaryTable from './components/SummaryTable'
 import Charts from './components/Charts'
-import { PigIcon, GearIcon } from './icons'
+import GoalsPage from './components/GoalsPage'
+import { PigIcon, GearIcon, GoalIcon } from './icons'
 
 export default function App() {
   const store = useAppStore()
   const {
-    accounts, transactions, settings, importedFingerprints,
+    accounts, transactions, settings, importedFingerprints, goals,
     addAccount, updateAccount, deleteAccount,
     addTransaction, addManyTransactions, updateTransaction, deleteTransaction,
     setSettings, recordImportedFingerprints,
+    addGoal, updateGoal, deleteGoal, addGoalCheckin, deleteGoalCheckin,
   } = store
 
   const [filters, setFilters] = useState({ selectedAccounts: [], fromMonth: '', toMonth: '' })
   const [showAccounts, setShowAccounts] = useState(false)
   const [showImport, setShowImport] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showGoals, setShowGoals] = useState(false)
 
   const fSet = (patch) => setFilters((f) => ({ ...f, ...patch }))
 
@@ -99,6 +103,20 @@ export default function App() {
 
   const txnFPset = useMemo(() => new Set(importedFingerprints), [importedFingerprints])
 
+  // goal overview for the dashboard metric (active goals only)
+  const goalSummary = useMemo(() => {
+    let total = 0
+    let saved = 0
+    goals.forEach((goal) => {
+      const g = computeGoal(goal, transactions)
+      if (g.level === 'paused' || g.level === 'completed' || g.level === 'expired') return
+      total += goal.targetAmount || 0
+      saved += g.saved
+    })
+    const pct = total > 0 ? Math.round((saved / total) * 100) : 0
+    return { total, saved, pct, count: goals.length }
+  }, [goals, transactions])
+
   const handleImport = (rows) => {
     const txs = rows.map((r) => ({
       date: r.date,
@@ -130,6 +148,12 @@ export default function App() {
         </div>
         <div className="flex gap-2">
           <button
+            onClick={() => setShowGoals(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-pig-accent text-white font-cute font-bold shadow-chip hover:brightness-105 transition"
+          >
+            <GoalIcon size={16} /> 存钱目标
+          </button>
+          <button
             onClick={() => setShowAccounts(true)}
             className="px-3.5 py-2 rounded-2xl bg-white text-pig-ink font-medium shadow-soft hover:brightness-105 transition"
           >
@@ -154,10 +178,11 @@ export default function App() {
           onChange={fSet}
         />
 
-        <Metrics totalAssets={totalAssets} netChange={netChange} month={latestMonth} />
+        <Metrics totalAssets={totalAssets} netChange={netChange} month={latestMonth} goalSummary={goalSummary} onOpenGoals={() => setShowGoals(true)} />
 
         <TransactionSection
           accounts={accounts}
+          goals={goals}
           onAdd={addTransaction}
           settings={settings}
           onOpenImport={() => setShowImport(true)}
@@ -169,6 +194,7 @@ export default function App() {
           transactions={txnInRange}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          goals={goals}
         />
 
         <Charts accounts={visibleAccounts} monthlyRows={monthlyRows} />
@@ -199,6 +225,21 @@ export default function App() {
       )}
       {showSettings && (
         <SettingsModal settings={settings} onClose={() => setShowSettings(false)} onSave={setSettings} />
+      )}
+
+      {showGoals && (
+        <GoalsPage
+          accounts={accounts}
+          transactions={transactions}
+          goals={goals}
+          settings={settings}
+          addGoal={addGoal}
+          updateGoal={updateGoal}
+          deleteGoal={deleteGoal}
+          addGoalCheckin={addGoalCheckin}
+          deleteGoalCheckin={deleteGoalCheckin}
+          onClose={() => setShowGoals(false)}
+        />
       )}
     </div>
   )

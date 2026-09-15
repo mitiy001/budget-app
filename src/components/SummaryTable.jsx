@@ -3,9 +3,12 @@ import { fmtMoney, yyyymm, monthStartBalance } from '../store'
 import { EditIcon, TrashIcon, ArrowDown } from '../icons'
 import TxnRow from './TxnRow'
 
-export default function SummaryTable({ accounts, monthlyRows, transactions, onEdit, onDelete }) {
+export default function SummaryTable({ accounts, monthlyRows, transactions, onEdit, onDelete, goals }) {
   const [openMonth, setOpenMonth] = useState(null)
   const [openTxnId, setOpenTxnId] = useState(null)
+
+  const goalNameById = {}
+  ;(goals || []).forEach((g) => (goalNameById[g.id] = g.name))
 
   const months = [...new Set(monthlyRows.map((r) => r.month))].sort()
   const byMonthAcc = {}
@@ -56,6 +59,7 @@ export default function SummaryTable({ accounts, monthlyRows, transactions, onEd
                   setOpenTxnId={setOpenTxnId}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  goalNameById={goalNameById}
                 />
               )
             })}
@@ -73,7 +77,7 @@ export default function SummaryTable({ accounts, monthlyRows, transactions, onEd
   )
 }
 
-function MonthGroup({ m, open, total, change, accounts, row, onToggle, txns, openTxnId, setOpenTxnId, onEdit, onDelete }) {
+function MonthGroup({ m, open, total, change, accounts, row, onToggle, txns, openTxnId, setOpenTxnId, onEdit, onDelete, goalNameById }) {
   return (
     <>
       <tr
@@ -114,6 +118,7 @@ function MonthGroup({ m, open, total, change, accounts, row, onToggle, txns, ope
                     onSave={(id, patch, dir) => onEdit(id, patch, dir)}
                     onCancel={() => setOpenTxnId(null)}
                     onDelete={onDelete}
+                    goalName={txn.goalId ? goalNameById[txn.goalId] : ''}
                   />
                 ))}
               </div>
